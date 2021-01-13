@@ -1,5 +1,5 @@
 # R 유저들을 위한 단변량 시계열 예측 모형 Prophet 소개
-이 Repo는 Facebook에서 제안하는 Prophet 모형을 소개하는 질 좋은 튜토리얼 자료를 찾고 있는 한국 R 유저들을 위해 만들었습니다. Facebook에서 훌륭한 [튜토리얼](https://facebook.github.io/prophet/docs/quick_start.html#r-api)을 제공하고 있으나, 영어로 된 자료라 영어에 능숙하지 않은 유저들은 약간 불편할 수 있겠다는 생각을 했어요. 안그래도 공부에 집중하기 힘든데, 영어로된 자료면 더 하기 싫을 때가 있죠. 다시 말하면, 한국어로 된 질 좋은 Prophet 모형의 튜토리얼 자료를 찾고 있는 유저들을 위해 만들었어요. 물론, 해당 글도 Facebook에서 제공하는 튜토리얼을 기반으로 제 의견을 첨가하여 작성했습니다. 그래서 Repo에서는 Prophet 모형의 이론적인 부분이 아닌 실제로 적용하는 방법에 대해 소개할 예정이에요. 혹시, 자세한 이론적 부분이 궁금하다면 [제 블로그](https://be-favorite.tistory.com/64)를 참고해주시면 될 것 같습니다. 
+이 Repo는 Facebook에서 제안하는 Prophet 모형을 소개하는 질 좋은 튜토리얼 자료를 찾고 있는 한국 R 유저들을 위해 만들었습니다. Facebook에서 훌륭한 [튜토리얼](https://facebook.github.io/prophet/docs/quick_start.html#r-api)을 제공하고 있으나, 영어로 된 자료라 영어에 능숙하지 않은 유저들은 약간 불편할 수 있겠다는 생각을 했어요. 안그래도 공부에 집중하기 힘든데, 영어로된 자료면 더 하기 싫을 때가 있죠. 물론, 해당 글도 Facebook에서 제공하는 튜토리얼을 기반으로 제 의견을 첨가하여 작성했습니다. 그래서 Repo에서는 Prophet 모형의 이론적인 부분이 아닌 실제로 적용하는 방법에 대해 소개할 예정이에요. 혹시, 자세한 이론적 부분이 궁금하다면 [제 블로그](https://be-favorite.tistory.com/64)를 참고해주시면 될 것 같습니다. 
 
 Prophet 모형을 이렇게 소개하는 이유는 [Prophet 논문](http://lethalletham.com/ForecastingAtScale.pdf)을 들여다 봤을 때, Facebook에서 해당 모형을 만든 motivation이 너무 매력적이었기 때문이에요. 시계열 예측 모형이 필요로 되는 실무자라면 이론적 부분은 차치하고 이 motivation만 이해해도 Prophet 모형을 얼른 적용해보고 싶을 겁니다:sunglasses::
 
