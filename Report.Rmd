@@ -5,7 +5,7 @@ date: "<center>`r Sys.Date()`</center>"
 output: 
   html_document:
       toc: yes
-      toc_depth: 5
+      toc_depth: 4
       toc_float: yes
       theme: sandstone
       highlight: tango
@@ -26,21 +26,27 @@ output:
 
 이 자료는 Facebook에서 제안하는 Prophet 모형을 소개하는 질 좋은 튜토리얼 자료를 찾고 있는 한국 R 유저들을 위해 만들었습니다. Facebook에서 훌륭한 [튜토리얼](https://facebook.github.io/prophet/docs/quick_start.html#r-api)을 제공하고 있으나, 영어로 된 자료라 영어에 능숙하지 않은 유저들은 약간 불편할 수 있겠다는 생각을 했어요. 안그래도 공부에 집중하기 힘든데, 영어로된 자료면 더 하기 싫을 때가 있죠. 물론, 해당 글도 Facebook에서 제공하는 튜토리얼을 기반으로 제 의견을 첨가하여 작성했습니다. 혹시 Prophet의 실제 적용뿐만 아니라, 자세한 이론적 부분이 궁금하다면 [제 블로그](https://be-favorite.tistory.com/64)를 참고해주시면 될 것 같습니다. 
 
-Prophet 모형을 이렇게 소개하는 이유는 Prophet 논문 [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf)을 들여다 봤을 때, Facebook에서 해당 모형을 만든 motivation이 너무 매력적이었기 때문이에요. 시계열 예측 모형이 필요로 되는 실무자라면 이론적 부분은 차치하고 이 motivation만 이해해도 Prophet 모형을 얼른 적용해보고 싶을 겁니다:sunglasses::
+Prophet 모형을 이렇게 소개하는 이유는 Prophet 논문 [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf)을 들여다 봤을 때, Facebook에서 해당 모형을 만든 motivation이 너무 매력적이었기 때문이에요. 시계열 예측 모형이 필요로 되는 실무자라면 이론적 부분은 차치하고 이 motivation만 이해해도 Prophet 모형을 얼른 적용해보고 싶을 겁니다.`r emo::ji("sunglasses")`
 
 * `r emo::ji("exclamation")`도메인 지식은 갖추었으나, 시계열을 다루는 지식이 부족한 실무자들을 위해
   + 실제 통계학 전공자들도 시계열 분석을 처음 공부할 때 어려움을 느끼는 경우가 많고, 대표적 통계적 시계열 예측모형이라 할 수 있는 ARIMA 모형을 실무에 적용하기 위해서는 공부해야할 것들이 많음(e.g 정상성)
 * `r emo::ji("exclamation")`유연성(flexibility), 확장성(scalable)이 뛰어나며 Business time series에 유연하게 적용할 수 있는 모형의 필요성
   + ARIMA 모형은 각 자료가 갖는 특성들을 유연하고 세밀하게 반영하기 힘듬.
   
-일단 첫 번째 motivation이 매우 감명깊었어요. Prophet 모형은 시계열을 3가지 요소로 분해하고 각 요소를 시간의 함수로 가법적으로 모형화하는데, 해당 자료에 대한 이해가 깊은 도메인 지식이 풍부한 실무자라면 이 튜토리얼만 잘 이해하고 수행해본다면 쉽게 모형을 advance할 수 있을거라고 생각합니다. 특히, 휴일효과(holiday effect)와 같은 것들을 아주 쉽게 사용자가 custom할 수 있다는 점이 아주 매력적이었어요. 
+일단 첫 번째 motivation이 매우 감명깊었어요. Prophet 모형은 시계열을 3가지 요소로 분해하고 각 요소를 시간의 함수로 가법적으로 모형화하는데, 해당 자료에 대한 이해가 깊은 도메인 지식이 풍부한 실무자라면 이 튜토리얼만 잘 이해하고 수행해본다면 모형을 advance하는데 큰 어려움을 겪지 않을거라 생각합니다. 저도 이렇게 자료를 만들면서 "Prophet 모형을 도메인 지식이 풍부한 실무자가 자유자재로 다룰 줄 안다면, 어떤 단변량 시계열 모형을 가져와도 결코 뒤쳐지진 않겠구나."하고 생각했어요. 아무튼, 이 자료에 나와있는 다양한 예제들을 수행하다보면 저처럼 도메인 지식의 중요성을 느낄 수 있을 겁니다.`r emo::ji("smile")` 또 하나 마음에 들었던 점은, {tidyverse}와 [{tidymodels}](https://github.com/be-favorite/Tutorial_tidymodels) (see, the tutorial, if you want a gentle introdunction)에 익숙한 R 유저로써 세부적인 옵션들을 조정하고 모형을 적합하는 코드들이 파이프연산자(the pipe operator, %>%)와 {dplyr}의 동사들과 함께 동작하기 상당히 편하게 설계되어있던 점입니다.`r emo::ji("heart_eyes")`
 
 좀 더 자세한 Prophet 모형의 이론적 부분이 궁금하시다면 제가 글의 초반부에 말씀드린 제 블로그를 참고해주세요. 혹시, 제 블로그 글만으로 부족하다거나 모호한 부분이 있다면 해당 블로그의 글에 댓글을 달아주시거나 위의 Prophet 논문 링크를 클릭하여 참고하시면 더 좋을겁니다! 해당 튜토리얼이 단변량 시계열 예측 모형이 필요로 되는 실무자들에게 조금이나마 도움이 됐으면 좋겠습니다.`r emo::ji("blush")`
 
 이제 튜토리얼을 하러 가봅시다.`r emo::ji("runner")`
 
-## **1 Quick Start**
-첫 번째 챕터는 Quick Start로 Prophet 모형 적합의 디테일한 부분을 설명하지 않고, 러프하게 소개한다. R에서 Prophet 모형을 제공하는 패키지는 {prophet}이다. 먼저 해당 패키지를 불러온다. 패키지가 설치되어 있지 않은 경우 `install.packages("prophet")`를 통해 CRAN(The Comprehensive R Archive Network)에서 내려받을 수 있다. 그리고, 해당 예제에서 쓸 추가적인 패키지를 불러온다. {vroom}은 파일을 읽을 목적으로, {tidyverse}는 data wragling, {lubridate}는 날짜를 다루기 위해 불러왔다. {lubridate}가 {base}의 날짜 함수들보다 훨씬 직관적이므로, 배워둘만한 가치가 있다(see, `vignette("lubridate", package = "lubridate")`).
+<br>
+
+## **1 Quick Start** {.tabset .tabset-fade .tabset-pills}
+***
+첫 번째 챕터는 Quick Start로 Prophet 모형 적합의 디테일한 부분을 설명하지 않고, 러프하게 소개할 것이다. 
+
+### 1.1 Preparing
+R에서 Prophet 모형을 제공하는 패키지는 {prophet}이다. 먼저 해당 패키지를 불러온다. 패키지가 설치되어 있지 않은 경우 `install.packages("prophet")`를 통해 CRAN(The Comprehensive R Archive Network)에서 내려받을 수 있다. 그리고, 해당 예제에서 쓸 추가적인 패키지를 불러온다. {vroom}은 파일을 읽을 목적으로, {tidyverse}는 data wragling, {lubridate}는 날짜를 다루기 위해 불러왔다. {lubridate}가 {base}의 날짜 함수들보다 훨씬 직관적이므로, 배워둘만한 가치가 있다(see, `vignette("lubridate", package = "lubridate")`).
 
 ```{r}
 library(tidyverse)
@@ -50,13 +56,14 @@ library(tidyverse)
 library(prophet)
 library(lubridate)
 library(vroom)
+ggplot2::theme_set(theme_light())
 loaded_package <- c("prophet", "vroom", "lubridate")
 .version <- map(loaded_package, packageVersion)
 names(.version) <- loaded_package
 .version
 ```
 
-[facebook의 Github repo prophet](https://github.com/facebook/prophet)에서는 각 챕터에 맞는 다양한 예제 자료를 제공하는데, Quick Start에서는 [Peyton Manning(NFL의 쿼터백)의 위키피디아 페이지 일별 조회 수에 로그를 취한 자료](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv)를 사용할 것이다.
+[facebook의 Github repositoy - prophet](https://github.com/facebook/prophet)에서는 {Wikipediatrend} 패키지에서 스크랩한 다양한 예제 자료를 각 챕터에 맞게 제공하는데, Quick Start에서는 [Peyton Manning(NFL의 쿼터백)의 위키피디아 페이지 일별 조회 수에 로그를 취한 자료](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv)를 사용할 것이다.
 ```{r, message = "FALSE"}
 wp_log_peyton <- vroom("./data/example_wp_log_peyton_manning.csv", delim = ",")
 glimpse(wp_log_peyton)
@@ -67,7 +74,10 @@ Prophet 모형을 적합하는 `prophet::prophet()`에서는 기본적으로 날
 summary(wp_log_peyton)
 ```
 
-해당 자료의 조회 수는 2007-12-10부터 2016-01-20까지 일별로 기록되었다. 바로 Prophet을 적합해보자:
+해당 자료는 2007-12-10부터 2016-01-20까지 일별로 기록된 자료임을 알 수 있다.
+
+### 1.2 Quick view on Prophet
+바로 Prophet을 적합해보자:
 ```{r, message = FALSE}
 mod <- prophet(wp_log_peyton)
 ```
@@ -102,7 +112,7 @@ plot(mod, pred)
 ```
 
 위 그래프는 다음의 함수를 이용하면 interative하게 그릴 수도 있다:
-```{r, fig.align = "center", out.width = "60%", cache = TRUE}
+```{r, warning = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 dyplot.prophet(mod, pred)
 ```
 
@@ -111,17 +121,20 @@ dyplot.prophet(mod, pred)
 prophet_plot_components(mod, pred)
 ```
 
+<br>
+
 ## **2 Details**
+***
 이제 모형 적합에서 고려할 수 있는 세부적인 인수들에 대해 파헤쳐보자. 
 
-### 3.1 Saturaing Forecasts
+### 2.1 Saturaing Forecasts
 Prophet에서는 예측값의 상한값과 하한값을 설정할 수 있다. 이를 영어로 Saturating Forecasts라 표현한다. 참고로, saturate는 "포화 상태로 만들다"라는 뜻이 있고 이를 풀어서 설명하면 어떤 것(st/sb)을 어떤 것으로 채우는 것이 불가능 하도록 또는 채울 필요가 없도록 완전히 채우는 것을 말한다(to fill something/somebody completely with something so that it is impossible or useless to add any more). 이번 챕터에서는 facebook의 Github에서 제공하는 [R의 위키피디아 페이지 일별 조회 수에 로그를 취한 자료](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_R.csv)를 사용할 것이다.
 ```{r, message = FALSE}
 wp_log_r <- vroom("./data/example_wp_log_R.csv", delim = ",")
 ```
 
 
-#### 3.1.1 Forecasting Growth
+#### 2.1.1 Forecasting Growth
 Prophet은 디폴트 설정으로 예측에 선형 모형을 사용한다. 어떤 시계열의 성장(growth)에 대한 예측을 수행할 때, 보통 해당 시계열이 취할 수 있는 최댓값이 존재한다(e.g. 총 인구 수, 시장의 총 규모, etc.). 이를 "적재력(carrying capacity)"이라 칭하고, 예측값은 해당 지점에서 포화(saturate)되어야 한다. 그리고, Prophet에서는 예측에 선형 모형뿐만이 아닌 로지스틱 함수의 성장 추세(i.e. 비선형)를 갖는 모형을 사용할 수도 있으며, 해당 모형을 설정할 때는 적재력을 반드시 명시해야한다. 다음과 같이 자료에 `cap` 열을 추가하여 적재력을 명시할 수 있다(Prophet의 성장 모형화는 자연 생태계의 인구 성장 추세와 유사함). toy data로 진행되는 이번 튜토리얼에서는 특정값을 가정하여 사용할 것이나, 일반적으로는 시장 규모에 대한 전문적 지식이나 자료를 반영하여 설정된다.
 ```{r}
 wp_log_r2 <- wp_log_r %>% 
@@ -141,7 +154,7 @@ pred_logistic <- predict(mod_logistic, future)
 plot(mod_logistic, pred_logistic)
 ```
 
-#### 3.1.2 Saturating Minimum
+#### 2.1.2 Saturating Minimum
 로지스틱 성장 곡선의 추세를 갖는 Prophet 모형은 `floor`열을 명시하면 최솟값도 포화시켜 조정할 수 있다. 방식은 `cap`을 설정했던 것과 동일하다
 ```{r, fig.align = "center", out.width = "60%", cache = TRUE}
 wp_log_r3 <- wp_log_r2 %>% 
@@ -160,12 +173,12 @@ plot(mod_logistic, pred_logistic)
 
 아울러, 최솟값으로 포화하는 로지스틱 성장 추세의 모형을 사용할 경우, 반드시 적재력을 나타내는 열 `cap`도 명시하여야 한다.
 
-### 3.2 Trend Changepoints
+### 2.2 Trend Changepoints
 Prophet은 시계열의 변화점(changepoints)을 자동으로 탐지하고 추세에 적절하게 반영한다. 이번 챕터에서는 이러한 변화점에 관한 것을 조정할 수 있는 몇 가지 인수들을 소개하고자 한다.
 
-#### 3.2.1 Automatic changepoint detection in Prophet
+#### 2.2.1 Automatic changepoint detection in Prophet
 Prophet은 수많은 잠재적 변화점(changepoints)을 명시함으로써 변화점을 탐지한다. 각 잠재적 변화점에서는 변화가 일어날  
-비율(rate) $\delta_j$를 가지며, 여기서 $j = 1, \cdots,S$로 S 고려할 변화점의 총 갯수를 의미한다. 그리고, $\boldsymbol{\delta}$는 희소 사전분포(sparse prior)를 가정하며, 이는 Lasso 회귀의 목적함수에 쓰이는 L1-regularization과 동일하다. 즉, 이는 본질적으로 Prophet 모형은 변화점이 될 수 있는 수많은 지점을 명시한 뒤에 그 중 가능한한 적은 지점을 변화점으로 사용하게 될 것임을 의미한다. 보통 많은 수의 변화점을 명시하고(e.g. 수년간 수집된 자료에 대해 월별로 변화점 명시) 사전분포로 $\delta_j \sim {\rm{Laplace}}(0, \tau)$를 사용한다(See, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.1 The Trend Model). 여기서 모수 $\tau$는 비율 $\delta_j$를 변화시킴으로써 모형의 유연성(flexibility)을 조절한다. $\tau$를 0까지 감소시키면 일반적인(standard, not-piecewise) 로지스틱 또는 선형 성장 곡선을 갖는 추세를 이루게 된다(i.e. 변화점이 없는 것과 동일).
+비율(rate) $\delta_j$를 가지며, 여기서 $j = 1, \cdots,S$로 S 고려할 변화점의 총 갯수를 의미한다. 그리고, $\boldsymbol{\delta}$는 희소 사전분포(sparse prior)를 가정하며, 이는 Lasso 회귀의 목적함수에 쓰이는 L1-regularization과 동일하다. 즉, 이는 본질적으로 Prophet 모형은 변화점이 될 수 있는 수많은 지점을 명시한 뒤에 그 중 가능한한 적은 지점을 변화점으로 사용하게 될 것임을 의미한다. 보통 많은 수의 변화점을 명시하고(e.g. 수년간 수집된 자료에 대해 월별로 변화점 명시) 사전분포로 $\delta_j \sim {\rm{Laplace}}(0, \tau)$를 사용한다(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.1 The Trend Model). 여기서 모수 $\tau$는 비율 $\delta_j$를 변화시킴으로써 모형의 유연성(flexibility)을 조절한다. $\tau$를 0까지 감소시키면 일반적인(standard, not-piecewise) 로지스틱 또는 선형 성장 곡선을 갖는 추세를 이루게 된다(i.e. 변화점이 없는 것과 동일).
 
 Quick Start 챕터에서 수행했던 Peyton Manning의 위키피디아 페이지 조회수 예측을 고려해보면, Prophet은 다음 그림에서 처럼 default로 25개의 잠재적 변화점을 시계열의 시작 날짜부터 80% 지점까지 균일하게 둔다:
 ```{r figure1, echo = FALSE, fig.cap = "출처: facebook.github.io", fig.align = "center", out.width = "60%"}
@@ -173,7 +186,7 @@ knitr::include_graphics("./fig/trendchangepoints_fig1.png")
 ```
 
 여기서 점선으로 그어진 수직선이 곧 잠재적 변화점을 의미한다. 수많은 잠재적 변화점을 두긴 했지만, 변화가 일어날 가능성($\delta_j$)의 조절이 희소 사전분포로 이루어지기 때문에 대부분의 변화점들은 사용되지 않을 것이다. 이는 각 변화점에서 비율의 크기를 시각화하여 확인할 수 있다:
-```{r figure1, echo = FALSE, fig.cap = "출처: facebook.github.io", fig.align = "center", out.width = "60%"}
+```{r figure2, echo = FALSE, fig.cap = "출처: facebook.github.io", fig.align = "center", out.width = "60%"}
 knitr::include_graphics("./fig/trendchangepoints_fig2.png")
 ```
 잠재적 변화점은 default로 25개가 고려되는데, 모형 적합을 수행하는 함수 `prophet()`의 `n_changepoints` 인수 통해 조정할 수 있다. 다만, `n_changepoints`은 자료에 따라 최적의 값이 다르므로 분석자의 직관에 의존하지 않은 regularization을 통한 튜닝이 필요로 될 것이다. 여기서 잠깐만 용어 정리를 하고 가자.
@@ -191,7 +204,7 @@ plot(mod, pred) +
 
 잠재적 변화점이 default로 시계열의 시작 날짜부터 80% 지점까지 설정되는 이유는 추세를 확실하게 파악하기 위해 충분한 시계열의 길이를 확보하기 위함이며, 끝의 20% 부분에서 잠재점 변화점을 고려하지 않는 이유는 시계열의 끝부분에서 탐지되는 변화점들에 의해 과적합이 일어나는 것을 방지하기 위함이다. 이러한 `prophet()`의 default 값은 꽤 잘 작동하는데, 모든 상황에서 그렇진 않으며 `changepoint_range` 인수을 통해 조정이 가능하다. 예를 들어, `prophet(data, changepoint.range = 0.9)`는 시작 지점부터 90% 지점까지의 잠재적 변화점을 고려하라는 말이다.
 
-#### 3.2.2 Adjusting trend flexibility
+#### 2.2.2 Adjusting trend flexibility {#anchor}
 만약 추세 변화가 과적합 또는 과소적합 되었다면,  `change_prior_scale`로 희소 사전분포의 강도를 조정하여 추세 변화의 유연성(flexibility)을 조절할 수 있다. 여기서 `change_prior_scale` 인수의 역할은 3.2.1에서 봤던 $\tau$를 조정하는 것이라고 보면 된다. 즉, `change_prior_scale`의 크기를 키울수록 추세 변화는 flexible해지고, 과적합 가능성이 있을 것이다. 해당 인수의 default 값은 0.05로 설정되어 있다. 다음과 같이 0.5로 키우면 탐지된 추세가 더 flexible 해짐을 확인할 수 있다:
 ```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 mod <- prophet(wp_log_peyton, changepoint.prior.scale = 0.5)
@@ -208,7 +221,7 @@ plot(mod, pred)
 
 적절한 `changepoint.prior.scale`을 찾기 위해서는 튜닝이 필요하다. 이는 3.8.1의 교차검증에서 다룰 것이다.
 
-#### 3.2.3 Specifying the locations of the changepoints
+#### 2.2.3 Specifying the locations of the changepoints
 마지막으로, 변화점의 위치를 자동으로 결정하는 것이 아닌 분석자가 그 위치를 명시할 수도 있다. `changepoint` 인수에 변화점이 놓이기를 원하는 날짜를 설정해주면 된다. 그럼 추세의 잠재적 변화점은 해당 지점에서만 고려될 것이다.
 ```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 mod <- prophet(wp_log_peyton, changepoints = c("2014-01-01"))
@@ -216,45 +229,176 @@ plot(mod, pred) +
   add_changepoints_to_plot(mod)
 ```
 
-### 3.3 Seasonality, Holiday Effects, And Regressor
+### 2.3 Seasonality, Holiday Effects, And Regressor
 이번 챕터에서는 계절성, 휴일효과, 그리고 추가적인 회귀자(regressor)도 custom하는 것에 방법에 대해 소개한다. 챕터 하나하나를 배우면서 자료의 특성을 완성도있게 반영할 수 있는 당신만의 Prophet 모형을 설정할 수 있을 것이다.`r emo::ji("smile")`
 
-#### 3.3.1 Modeling Holidays and Special Events
-먼저, 휴일 또는 특별한 이벤트가 있는 날을 모델링하는 방법에 대해 알아보자. 꽤나 직관적으로 어렵지 않게 휴일효과를 반영할 수 있다.
+#### 2.3.1 Modeling Holidays and Special Events
+먼저, 휴일 또는 특별한 이벤트가 있는 날을 모델링하는 방법에 대해 알아보자. 휴일효과는 다음과 같이 직관적으로 반영할 수 있다:
+```{r}
+playoffs <- tibble(
+  holiday = "playoff",
+  ds = ymd(c("2008-01-13", "2009-01-03", "2010-01-16",
+             "2010-01-24", "2010-02-07", "2011-01-08",
+             "2013-01-12", "2014-01-12", "2014-01-19",
+             "2014-02-02", "2015-01-11", "2016-01-17",
+             "2016-01-24", "2016-02-07")),
+  lower_window = 0,
+  upper_window = 1
+)
+superbowls <- tibble(
+  holiday = "superbowl",
+  ds = ymd(c("2010-02-07", "2014-02-02", "2016-02-07")),
+  lower_window = 0,
+  upper_window = 1
+)
 
-#### 3.3.2 Built-in Country Holidays
-#### 3.3.3 Fourier Order for Seasonalities
-#### 3.3.4 Specifying Custom Seasonalities
-#### 3.3.5 Seasonalities that depend on other factors
-#### 3.3.6 Prior scale for holidays and seasonality
-#### 3.3.7 Additional regressors
+holidays <- bind_rows(playoffs, superbowls)
+```
+
+
+NFL이 쿼터백 Peyton Manning의 위키피디아 페이지 일별 조회 수에 관한 자료이므로, 미국의 가장 큰 스포츠 행사 NFL의 챔피언십 슈퍼볼(Super Bowl)의 플레이오프와 결승전을 휴일효과로 반영해보았다. 그리고, Prophet의 휴일효과 반영에서는 중요한 휴일 또는 특별한 이벤트가 있는 당일의 전후로 효과를 다르게 줄 수 있는데, 이를 반영 할 수 있는 열이 `lower_window`와 `upper_window`에 해당한다. 예를 들어, 위 코드처럼 `lower_window = 0`, `upper_window = 1`을 설정하면 해당 이벤트의 다음날 효과를 다르게 주라는 뜻을 말한다. 이렇게 특정 휴일의 당일 전후에 효과를 포함시는 것을 휴일의 창(a window of days)이라 칭한다. 특히, 우리나라의 추석이나 설과 같은 명절은 추석과 설 당일 전후로 휴일의 창을 반영해야할 것이다.
+```{r, message = FALSE, cache = TRUE}
+mod <- prophet(wp_log_peyton, holidays = holidays)
+pred <- predict(mod, future)
+pred %>% 
+  select(ds, playoff, superbowl) %>% 
+  filter(abs(playoff + superbowl) > 0) %>%
+  tail(10)
+```
+
+휴일효과가 반영된 결과는 위 코드블럭에서처럼 예측을 수행한 객체에서 확인할 수 있으며, 시계열을 3요소로 분해한 그림에서도 확인할 수 있다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+prophet_plot_components(mod, pred)
+```
+
+휴일효과를 반영하는 요소의 그림을 보면 플레이오프가 진행되는 날에 값이 튀고(spike), 특히 슈퍼볼 결승전에 크게 값이 튀는 것을 확인할 수 있다. 개개의 휴일효과를 확인해볼 수도 있다. 예를 들어, 슈퍼볼 결승전에 대한 휴일효과만을 보고싶다면 `plot_forecast_component(mod, forecast, "superbowl")`를 수행하면 된다.
+
+#### 2.3.2 Built-in Country Holidays
+{prophet}에서는 미국의 국경일 목록을 기본적으로 제공한다. 자세한 내용은 [여기서](https://github.com/dr-prodigy/python-holidays) 확인할 수 있다. 해당 페이지에서 확인할 수 있듯이 Python에서는 holidays라는 패키지를 통해 다양한 나라의 국경일 목록을 제공하고 있으나, 아쉽게도 R에서는 지원이 안된다. Facebook 너무하다.`r emo::ji("anger")` 기본적으로 제공되는 국경일 목록은 `add_country_holidays()`를 통해 불러올 수 있고, 다음과 같은 과정으로 적합한다. 사전에 우리가 설정했던 `holidays`를 반영하고, 그 뒤에 {prophet}에서 제공하는 미국의 국경일을 반영한 뒤에 자료에 prophet 모형을 적합한다.
+```{r, message = FALSE, cache = TRUE}
+mod <- prophet(holidays = holidays) %>% 
+  add_country_holidays(country_name = "US") %>% 
+  fit.prophet(wp_log_peyton)
+```
+
+모형 적합에 사용된 휴일효과에 대한 정보는 다음과 같이 확인할 수 있다:
+```{r}
+mod$train.holiday.names
+```
+
+마지막으로 해당 모형 객체로 예측을 수행한 뒤에, 반영된 휴일효과를 시각화하여 확인해보자:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+pred <- predict(mod, future)
+prophet_plot_components(mod, pred)
+```
+
+#### 2.3.3 Fourier Order for Seasonalities
+Prophet에서는 푸리에 급수(Fourier series)로 계절성을 추정한다(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.2 Seasonality):
+
+<center> $s(t) = \sum_{n=1}^N (a_n cos(\frac{2 \pi nt}{P}) + b_n sin(\frac{2 \pi nt}{P}))$ </center>
+
+푸리에 급수의 아이디어는 임의의 주기함수를 주기가 조금씩 다른 정현파(sin 함수, cos 함수)의 합으로 나타내는 것에 있으며, Prophet에서는 이 아이디어를 그대로 이용하여 계절성을 추정한다. 여기서 $N$을 푸리에 차수(Fourier order)라고 하며 크기를 키울수록 계절성은 flexible 하게 추정된다. 또한, sin 함수와 cos 함수에 대해 추정이 필요하므로 총 2N개의 모수 추정이 필요로 된다. 연별 계절성에 대한 푸리에 차수의 default 값은 10으로 Peyton Manning 자료의 연별 계절성은 다음과 같이 적합된다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+mod <- prophet(wp_log_peyton)
+pred <- predict(mod, future)
+prophet_plot_components(mod, pred)
+```
+
+마지막 그림을 확인하면 된다. Facebook에서 제공하는 예제에서는 `plot_yearly(mod)`를 수행하면 마지막 그림만을 보여주는데, `help(package = "prophet")`을 해보면 해당 함수는 제공되지 않고 있다. 그래서, 되는대로 위 함수를 이용하고 있다. `plot_forecast_component(mod, pred, "yearly")`도 이용할 수 있는데, 계절성의 변화를 1년에 걸쳐서 보여주는 위 그림과 달리 자료가 갖는 전 시점에서 계절성의 반복을 보여주다보니 연별로 반복되는 계절성을 정확하게 파악하기 위해선 위 그림이 더 낫다고 판단하여 `prophet_plot_components()`를 이용하였다. 푸리에 차수의 크기를 키울 경우 계절성은 좀 더 복잡한 형태(more flexible)로 추정될 것이다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+mod <- prophet(wp_log_peyton, yearly.seasonality = 20)
+pred <- predict(mod, future)
+prophet_plot_components(mod, pred)
+```
+
+푸리에 차수 $N$을 지나치게 크게 설정하면, 과적합을 야기할 수 있으니 적당한 N 값을 설정하는 것이 좋다. 자료마다 편차가 존재하겠지만, yearly 또는 weekly seasonality를 가지는 경우 각각 $N=10$, $N=3$으로 설정하면, 대부분의 문제에서 잘 작동한다.
+
+#### 2.3.4 Specifying Custom Seasonalities
+시계열의 계절 주기가 둘 이상인 경우, Prophet은 default로 주별 계절성과 연별 계절성을 적합한다. 또한, sub-daily 자료(i.e. YYYY-MM-DD HH:MM:SS)일 경우 default로 일별 계절성을 적합할 것이다. 여기서 더 나아가, Prophet에서는 `add_seasonality()`로 다른 계절성들(i.e. monthly, quarterly, hourly)을 모형에 반영할 수 있다. 해당 함수에서는 원하는 계절성 주기, 한 주기의 지속 시기(float number of days in one period), 푸리에 차수를 지정할 수 있다. 아울러 추가적인 인수로 계절성에 과적합 또는 과소적합의 문제가 보일때, 계절성에 대한 사전분포의 scale을 조정할 수 있는데 이는 [2.3.6](#anchor)에서 다루려고 한다. 다음의 예는 Peyton Manning 자료에 default로 적합되는 주별 계절성 대신 월별 계절성을 적합한 것이다:
+
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+mod <- prophet(weekly.seasonality = FALSE) %>% 
+  add_seasonality(name = "monthly", period = 30.5, fourier.order = 5) %>% 
+  fit.prophet(wp_log_peyton)
+pred <- predict(mod, future)
+prophet_plot_components(mod, pred)
+```
+
+#### 2.3.5 Seasonalities that depend on other factors
+시계열 자료의 계절성은 다른 요인에 의존할 수도 있다. 예를 들어, 여름에는 주별 계절성의 패턴이 다르다거나, 주중 그리고 주말의 일별 계절적 패턴이 다른 경우가 있을 수도 있다. Prophet에서는 이러한 유형의 계절성도 조건부 계절성을 사용하여 모델링할 수 있다. 
+
+Peyton Manning 자료에 대해 이를 적용해보자. 주별 계절성은 default로 그 패턴이 1년 내내 동일하다고 가정한다. 그러나, Peyton Manning 자료의 주별 계절성의 패턴은 NFL의 시즌이 진행 중(on-season)일 때(일요일마다 경기가 있을 때)와 시즌이 종료된 시기(off-season)일 때 다를 것이라 기대할 수 있다. 이러한 주별 계절성은 on-season, off-season으로 주별 계절성을 분리하는 조건부 계절성을 사용하여 반영할 수 있다.
+
+먼저 자료와 예측의 수행에 필요한 날짜 열을 갖는 데이터프레임에 각 날짜의 on-season, off-season 여부를 나타내는 logical vector 열을 각각 추가해준뒤, 조건부 계절성을 반영한 모형을 적합하고 예측을 수행한다. NFL 시즌은 9월부터 1월까지 진행된다:
+
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+is.nfl_season <- function(ds){
+  month(ds) >= 9 | month(ds) <= 1
+}
+wp_log_peyton_season <- wp_log_peyton %>% 
+  mutate(
+    on_season = is.nfl_season(ds),
+    off_season = !is.nfl_season(ds)
+    )
+future_season <- future %>% 
+    mutate(
+    on_season = is.nfl_season(ds),
+    off_season = !is.nfl_season(ds)
+    )
+
+mod_season <- prophet(weekly.seasonality = FALSE) %>% 
+  add_seasonality(name = "weekly_on_season", period = 7, fourier.order = 3, condition.name = "on_season") %>% 
+  add_seasonality(name = "weekly_off_season", period = 7, fourier.order = 3, condition.name = "off_season") %>%
+  fit.prophet(wp_log_peyton_season)
+
+pred_season <- predict(mod_season, future_season)
+prophet_plot_components(mod_season, pred_season)
+```
+
+우리가 custom한 두 계절성을 위 그림에서 비교할 수 있다. 일요일마다 경기가 치뤄지는 NFL의 on-season을 나타내는 계절성의 경우 일요일과 월요일에 큰 증가가 있으나, off-season인 경우 일요일과 월요일에 딱히 증가가 없다(see the $y$-axis).
+
+#### 2.3.6 Prior scale for holidays and seasonality {#anchor}
+휴일효과와 계절성이 과적합이 일어난 경우, 사전분포의 scale을 조정하여 평활하여 곡선의 형태가 덜 복잡하게(less flexible) 만들 수 있다. `holidays.prior.scale`로 휴일효과의 사전분포 scale 조정을 수행할 수 있다. default는 10으로 설정되어 있으며 [2.2.2](#anchor)에서 추세 변화의 regularization을 했던 것과 같이 scale을 줄일수록 휴일효과는 덜 복잡한 형태를 띠게 된다.
+```{r, message = FALSE, cache = TRUE}
+mod <- prophet(wp_log_peyton, holidays = holidays, holidays.prior.scale = 0.05)
+pred <- predict(mod, future)
+pred %>% 
+  select(ds, playoff, superbowl) %>% 
+  filter(abs(playoff+superbowl) > 0) %>% 
+  tail(10)
+```
+
+
+
+#### 2.3.7 Additional regressors
 
 
 
 
 
-### 3.4 Multiplicative Seasonality
+### 2.4 Multiplicative Seasonality
 
-### 3.5 Uncertainty Intervals
-#### 3.5.1 Uncertainty in the trend
-#### 3.5.2 Uncertainty in seasonality
+### 2.5 Uncertainty Intervals
+#### 2.5.1 Uncertainty in the trend
+#### 2.5.2 Uncertainty in seasonality
 
-### 3.6 Outliers
+### 2.6 Outliers
 
-### 3.7 Non-Daily Data
-#### 3.7.1 Sub-daily data
-#### 3.7.2 Data with regular gaps
-#### 3.7.3 Monthly data
-#### 3.7.4 Holidays with aggregated data
+### 2.7 Non-Daily Data
+#### 2.7.1 Sub-daily data
+#### 2.7.2 Data with regular gaps
+#### 2.7.3 Monthly data
+#### 2.7.4 Holidays with aggregated data
 
-### 3.8 Diagnostics
-#### 3.8.1 Parallelizing cross validation
-#### 3.8.2 Hyperparameter tuning
+### 2.8 Diagnostics
+#### 2.8.1 Parallelizing cross validation
+#### 2.8.2 Hyperparameter tuning
 
-## **4 Additional Topics**
+## **3 Additional Topics**
+***
 
-### 4.1 Saving models
-### 4.2 Flat trend and custom trends
-### 4.3 Updating fitted models
+### 3.1 Saving models
+### 3.2 Flat trend and custom trends
+### 3.3 Updating fitted models
 
-## **5 Getting Help and Contributing**
+## **4 Getting Help and Contributing**
