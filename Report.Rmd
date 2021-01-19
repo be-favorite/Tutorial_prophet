@@ -176,9 +176,17 @@ plot(mod_logistic, pred_logistic)
 ### 2.2 Trend Changepoints
 Prophet은 시계열의 변화점(changepoints)을 자동으로 탐지하고 추세에 적절하게 반영한다. 이번 챕터에서는 이러한 변화점에 관한 것을 조정할 수 있는 몇 가지 인수들을 소개하고자 한다.
 
-#### 2.2.1 Automatic changepoint detection in Prophet
+#### 2.2.1 Automatic changepoint detection in Prophet {#anchor}
 Prophet은 수많은 잠재적 변화점(changepoints)을 명시함으로써 변화점을 탐지한다. 각 잠재적 변화점에서는 변화가 일어날  
-비율(rate) $\delta_j$를 가지며, 여기서 $j = 1, \cdots,S$로 S 고려할 변화점의 총 갯수를 의미한다. 그리고, $\boldsymbol{\delta}$는 희소 사전분포(sparse prior)를 가정하며, 이는 Lasso 회귀의 목적함수에 쓰이는 L1-regularization과 동일하다. 즉, 이는 본질적으로 Prophet 모형은 변화점이 될 수 있는 수많은 지점을 명시한 뒤에 그 중 가능한한 적은 지점을 변화점으로 사용하게 될 것임을 의미한다. 보통 많은 수의 변화점을 명시하고(e.g. 수년간 수집된 자료에 대해 월별로 변화점 명시) 사전분포로 $\delta_j \sim {\rm{Laplace}}(0, \tau)$를 사용한다(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.1 The Trend Model). 여기서 모수 $\tau$는 비율 $\delta_j$를 변화시킴으로써 모형의 유연성(flexibility)을 조절한다. $\tau$를 0까지 감소시키면 일반적인(standard, not-piecewise) 로지스틱 또는 선형 성장 곡선을 갖는 추세를 이루게 된다(i.e. 변화점이 없는 것과 동일).
+비율(rate) $\delta_j$를 가지며, 여기서 $j = 1, \cdots,S$로 $S$는 고려할 변화점의 총 갯수를 의미한다. 그리고, 추세 적합에 관여하는 $\boldsymbol{\delta}$는 희소 사전분포(sparse prior)를 따른다고 가정하며, 이는 Lasso 회귀(see more details [here](https://be-favorite.tistory.com/46?category=908019))의 목적함수에 쓰이는 L1-regularization(if you don't know what it means, see [here](https://be-favorite.tistory.com/30?category=894492))과 동일하다. 즉, 이는 본질적으로 Prophet 모형은 변화점이 될 수 있는 수많은 지점을 명시한 뒤에 그 중 가능한한 적은 지점을 변화점으로 사용하게 될 것임을 의미한다.
+
+Prophet에서는 보통 많은 수의 변화점을 명시하고(e.g. 수년간 수집된 자료에 대해 월별로 변화점 명시) 사전분포로 $\delta_j \sim {\rm{Laplace}}(0, \tau)$를 사용한다(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.1 The Trend Model). 여기서 모수 $\tau$는 비율 $\delta_j$를 변화시킴으로써 모형의 유연성(flexibility)을 조절한다. 즉, 추세 적합의 조절모수는 $\tau$라 할 수 있다. 예를 들어, $\tau$를 0까지 감소시키면 일반적인(standard, not-piecewise) 로지스틱 또는 선형 성장 곡선을 갖는 추세를 이루게 된다(i.e. 변화점이 없는 것과 동일). 그리고, 앞서 추세 적합에 관여하는 사전분포를 Lasso 회귀의 목적함수에 쓰이는 L1-regularization과 동일하다고 했는데, 그 이유는 Lasso의 회귀계수 추정량을 베이지안 관점으로 풀어보면 회귀계수 추정량의 사전분포는 다음과 같기 때문이다($\sigma^2$은 $I$라 가정):  
+
+<br>
+${\boldsymbol{\beta}} \sim {\rm{DE}}(0, \lambda I)$
+<br>
+
+여기서 조절모수 $\lambda$는 $\tau$와 동일한 역할을 하고, ${\rm{DE}}$는 이중지수(double exponential) 분포로 다른 말로는 라플라스(Laplace) 분포라고 일컫는다. 이로써 둘은 완벽하게 동일하다는 것을 확인할 수 있다.
 
 Quick Start 챕터에서 수행했던 Peyton Manning의 위키피디아 페이지 조회수 예측을 고려해보면, Prophet은 다음 그림에서 처럼 default로 25개의 잠재적 변화점을 시계열의 시작 날짜부터 80% 지점까지 균일하게 둔다:
 ```{r figure1, echo = FALSE, fig.cap = "출처: facebook.github.io", fig.align = "center", out.width = "60%"}
@@ -205,7 +213,7 @@ plot(mod, pred) +
 잠재적 변화점이 default로 시계열의 시작 날짜부터 80% 지점까지 설정되는 이유는 추세를 확실하게 파악하기 위해 충분한 시계열의 길이를 확보하기 위함이며, 끝의 20% 부분에서 잠재점 변화점을 고려하지 않는 이유는 시계열의 끝부분에서 탐지되는 변화점들에 의해 과적합이 일어나는 것을 방지하기 위함이다. 이러한 `prophet()`의 default 값은 꽤 잘 작동하는데, 모든 상황에서 그렇진 않으며 `changepoint_range` 인수을 통해 조정이 가능하다. 예를 들어, `prophet(data, changepoint.range = 0.9)`는 시작 지점부터 90% 지점까지의 잠재적 변화점을 고려하라는 말이다.
 
 #### 2.2.2 Adjusting trend flexibility {#anchor}
-만약 추세 변화가 과적합 또는 과소적합 되었다면,  `change_prior_scale`로 희소 사전분포의 강도를 조정하여 추세 변화의 유연성(flexibility)을 조절할 수 있다. 여기서 `change_prior_scale` 인수의 역할은 3.2.1에서 봤던 $\tau$를 조정하는 것이라고 보면 된다. 즉, `change_prior_scale`의 크기($\tau$)를 키울수록 추세 변화는 flexible해지고, 과적합 가능성이 있을 것이다. 해당 인수의 default 값은 0.05로 설정되어 있다. 다음과 같이 0.5로 키우면 탐지된 추세가 더 flexible 해짐을 확인할 수 있다:
+만약 추세 변화가 과적합 또는 과소적합 되었다면,  `change.prior.scale`로 희소 사전분포의 모수 $\tau$를 조정하여 추세 변화의 유연성(flexibility)을 조절할 수 있다. 즉, `change.prior.scale`의 크기($\tau$)를 키울수록 추세 변화는 flexible해지고, 과적합 가능성이 있을 것이다. 해당 인수의 default 값은 0.05로 설정되어 있다. 다음과 같이 0.5로 키우면 탐지된 추세가 더 flexible 해짐을 확인할 수 있다:
 ```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 mod <- prophet(wp_log_peyton, changepoint.prior.scale = 0.5)
 future <- make_future_dataframe(mod, periods = 365)
@@ -219,7 +227,7 @@ mod <- prophet(wp_log_peyton, changepoint.prior.scale = 0.001)
 plot(mod, pred)
 ```
 
-적절한 `changepoint.prior.scale`을 찾기 위해서는 튜닝이 필요하다. 이는 3.8.1의 교차검증에서 다룰 것이다.
+적절한 `changepoint.prior.scale`($\tau$)을 찾기 위해서는 튜닝이 필요하다. 이는 [2.8.2](#anchor)에서 다룰 것이다.
 
 #### 2.2.3 Specifying the locations of the changepoints
 마지막으로, 변화점의 위치를 자동으로 결정하는 것이 아닌 분석자가 그 위치를 명시할 수도 있다. `changepoint` 인수에 변화점이 놓이기를 원하는 날짜를 설정해주면 된다. 그럼 추세의 잠재적 변화점은 해당 지점에서만 고려될 것이다.
@@ -311,7 +319,7 @@ pred <- predict(mod, future)
 prophet_plot_components(mod, pred)
 ```
 
-푸리에 차수 $N$을 지나치게 크게 설정하면, 과적합을 야기할 수 있으니 적당한 N 값을 설정하는 것이 좋다. 자료마다 편차가 존재하겠지만, yearly 또는 weekly seasonality를 가지는 경우 각각 $N=10$, $N=3$으로 설정하면, 대부분의 문제에서 잘 작동한다.
+푸리에 차수 $N$을 지나치게 크게 설정하면, 과적합을 야기할 수 있으니 적당한 N 값을 설정하는 것이 좋다. 자료마다 편차가 존재하겠지만, yearly 또는 weekly seasonality를 가지는 경우 각각 $N=10$, $N=3$으로 설정하면, 대부분의 문제에서 잘 작동한다. 아울러, 적절한 푸리에 차수 $N$의 결정은 교차검증을 통해 AIC와 같은 측도를 기준으로 결정할 수도 있다.
 
 #### 2.3.4 Specifying Custom Seasonalities
 시계열의 계절 주기가 둘 이상인 경우, Prophet은 default로 주별 계절성과 연별 계절성을 적합한다. 또한, sub-daily 자료(i.e. YYYY-MM-DD HH:MM:SS)일 경우 default로 일별 계절성을 적합할 것이다. 여기서 더 나아가, Prophet에서는 `add_seasonality()`로 다른 계절성들(i.e. monthly, quarterly, hourly)을 모형에 반영할 수 있다. 해당 함수에서는 원하는 계절성 주기, 한 주기의 지속 시기(float number of days in one period), 푸리에 차수를 지정할 수 있다. 아울러 추가적인 인수로 계절성에 과적합 또는 과소적합의 문제가 보일때, 계절성에 대한 사전분포의 크기($\tau$)를 조정할 수 있는데 이는 [2.3.6](#anchor)에서 다루려고 한다. 다음의 예는 Peyton Manning 자료에 default로 적합되는 주별 계절성 대신 월별 계절성을 적합한 것이다:
@@ -358,7 +366,44 @@ prophet_plot_components(mod_season, pred_season)
 우리가 custom한 두 계절성을 위 그림에서 비교할 수 있다. 일요일마다 경기가 치뤄지는 NFL의 on-season을 나타내는 계절성의 경우 일요일과 월요일에 큰 증가가 있으나, off-season인 경우 일요일과 월요일에 딱히 증가가 없다(see the $y$-axis).
 
 #### 2.3.6 Prior scale for holidays and seasonality {#anchor}
-휴일효과와 계절성이 과적합이 일어난 경우, 사전분포의 크기을 조정하여 평활하여 곡선의 형태가 덜 복잡하게(less flexible) 만들 수 있다. 먼저 휴일효과는 `holidays.prior.scale`으로 사전분포의 크기 조정을 수행할 수 있다. default는 10으로 설정되어 있으며 [2.2.2](#anchor)에서 추세 변화의 regularization을 했던 것과 같이 크기를 줄일수록 휴일효과는 덜 복잡한 형태를 띠게 된다.
+휴일효과와 계절성도 추세 적합에서처럼 과적합이 일어난 경우에 사전분포의 모수 조정을 통한 평활로 곡선의 형태를 덜 복잡하게(less flexible) 만들 수 있다. 
+
+예를 들어, 푸리에 차수 $N = 10$인 연별 계절성분을 $X(t)$라 하면: 
+
+<br>
+<center> $X(t) = [cos(\frac{2 \pi (1)t}{365.25}), \cdots, sin(\frac{2 \pi (10)t}{365.25})]$ </center>
+<br>
+Prophet의 계절 요소는 다음과 같이 추정된다:
+
+<br>
+<center> $s(t) = X(t) {\boldsymbol{\beta}}$ </center>
+<br>
+
+단, 여기서 ${\boldsymbol{\beta}} \sim {\rm{Normal}}(0, \sigma^2)$으로 계절성에 대한 평활 사전분포를 가정한다. 즉, $\sigma^2$을 조절모수(tuning parameter)라고 할 수 있다.(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.2 Seasonality)
+
+휴일효과도 계절성과 유사한 방식으로 추정된다. 반영하고자 하는 각 휴일효과를 $i$라 하고, 각 휴일효과의 과거 및 미래 날짜들의 집합을 $D_i$라 하자. 그럼 시계열의 임의의 시점 $t$가 휴일 $i$에 포함되는지를 나타내는 지시함수를 정의할 수 있다. 예를 들어, 고려하고자 하는 휴일효과가 $1, 2, \cdots, L$개 존재한다고 하면, 앞서 계절성분을 정의했던 것과 유사하게 휴일효과에 대한 요소를 다음과 같이 정의할 수 있다:
+
+<br>
+<center> $Z(t) = [{\boldsymbol{1}}(t \in D_1), \cdots, {\boldsymbol{1}}(t \in D_L)]$. </center>
+<br>
+
+그럼, Prophet의 휴일효과는 최종적으로 다음과 같이 추정된다:
+
+<br>
+<center> $h(t) = Z(t) {\boldsymbol{\kappa}}$. </center>
+<br>
+
+여기서 ${\boldsymbol{\kappa}} \sim {\rm{Normal}}(0, \nu^2)$으로 계절성과 마찬가지로 평활 사전분포를 가정한다. 즉, 휴일효과의 조절모수는 $\nu^2$이라 할 수 있다. 아울러, 휴일효과의 경우 [2.3.1](#anchor)에서 휴일의 창이라는 효과를 통해 추석 또는 설 당일과 같은 명절의 주변 일자를 지정하여 효과를 다르게 줄 수 있다고 언급했었는데, 이렇게 휴일의 창으로 고려되는 날짜들 또한 각 날짜를 본질적으로 휴일 그 자체로 다루어 추정을 수행하기 때문에 가능해지는 것이다(see details, [Talyor and Letham (2018)](http://lethalletham.com/ForecastingAtScale.pdf) - 3.3 Holidays and Events).
+
+계절성과 휴일효과의 적합을 조절하는 각 모수 $\sigma^2$과 $\nu^2$도 추세 적합을 조정하는 모수 $\tau$와 같이 그 크기를 키울수록 복잡한 효과를 추정하게 되고, 그에 따라 과적합의 우려가 커질 것이다. 그리고, 둘에 관해 마지막으로 언급하고 싶은 점은 [2.2.1](#anchor)에서 추세 적합에 관여하는 사전분포는 곧 Lasso 회귀의 L1-regularization과 동일하다고 했었는데, 계절성과 휴일효과에 관여하는 두 사전분포는 Ridge 회귀((see more details [here](https://be-favorite.tistory.com/29?category=908019)))의 L2-regularization과 동일하다. 마찬가지로 Ridge의 회귀계수 추정량을 베이지안 관점으로 풀어서 회귀계수 추정량의 사전분포를 구해보면 알 수 있다($\sigma^2$은 $I$라 가정):
+
+<br>
+${\boldsymbol{\beta}} \sim {\rm{Normal}}(0, \tau^2 I)$
+<br>
+
+단, 여기서 $\tau^2$은 $\frac{\sigma^2}{\lambda} = \frac{I}{\lambda}$에 해당한다($\sigma^2$은 계절성의 사전분포를 조절하는 모수가 아닌 분산을 의미한다). 이로써, 계절성과 휴일효과 각각의 사전분포를 조절하는 $\sigma^2$, $\nu^2$은 Ridge 회귀 추정량의 사전분포를 조절하는 $\tau^2$와 정확하게 동일함을 확인했다.
+
+먼저 휴일효과는 `holidays.prior.scale`으로 $\nu^2$의 조정을 수행할 수 있다. default는 10으로 설정되어 있다.
 ```{r, message = FALSE, cache = TRUE}
 mod <- prophet(wp_log_peyton, holidays = holidays, holidays.prior.scale = 0.05)
 pred <- predict(mod, future)
@@ -368,7 +413,7 @@ pred %>%
   tail(10)
 ```
 
-[2.3.1](#anchor)의 3번째 코드블럭의 결과와 비교해보면, 특히 superbowl 휴일효과의 크기가 약해졌음을 확인할 수 있다. 계절성의 경우 `seasonality_prior_sacle`로 사전분포의 크기를 조정할 수 있다. 아울러, 사전분포의 크기는 더 세밀하게 조정이 가능하다. 예를 들어, 휴일효과의 경우 휴일효과에 대한 정보를 갖는 데이터프레임에 `prior_scale` 열을 만들어서 각 휴일효과에 대한 사전분포 크기의 조정이 가능하다. 계절성의 경우 `add_seasonality`를 통해 각 계절성의 사전분포 크기을 조정할 수 있다. 예를 들어, 주별 계절성의 사전분포 크기는 다음과 같이 설정할 수 있다:
+[2.3.1](#anchor)의 3번째 코드블럭의 결과와 비교해보면, 특히 superbowl 휴일효과의 크기가 약해졌음을 확인할 수 있다. 계절성의 경우 `seasonality.prior.scale`로 $\sigma^2$을 조정할 수 있다. 아울러, 사전분포의 크기는 더 세밀하게 조정이 가능하다. 예를 들어, 휴일효과의 경우 휴일효과에 대한 정보를 갖는 데이터프레임에 `prior.scale` 열을 만들어서 각 휴일효과에 대한 사전분포 크기의 조정이 가능하다. 계절성의 경우 `add_seasonality`를 통해 각 계절성의 사전분포의 모수 $\sigma^2$을 조정할 수 있다. 예를 들어, 주별 계절성을 반영하는 사전분포의 $\sigma^2$은 다음과 같이 설정할 수 있다:
 ```{r, message = FALSE, cache = TRUE}
 mod <- prophet() %>% 
   add_seasonality(name = "weekly", period = 7, fourier.order = 3, prior.scale = 0.1)
@@ -402,7 +447,7 @@ prophet_plot_components(mod_sun, pred_sun)
 
 회귀자로 쓰고싶은 시계열 자료에 과거값만 주어질 경우 한 가지 방법이 있다. 예를 들어, $y(t)$를 Prophet으로 모형화 하는데 시계열 $r(t)$를 회귀자로 포함시킬 경우, Prophet으로 먼저 $r(t)$의 미래값을 예측하고 해당 값들을 $y(t)$의 회귀자로 사용하는 것이다. 그러나, 이러한 방식은 $r(t)$가 $y(t)$보다 예측하기 쉬운 경우에만 유용할 수 있다. 그 예로 하위 수준의 예측에서 보다 최상위 수준(top-level)의 예측에서 더 높은 SNR(signal to noise ratio)을 갖는 계층적 시계열을 들 수 있다. SNR이 더 높다는 말은 곧 잡음(noise)가 더 작다는 말이며, 이는 즉 최상위 수준의 예측이 더 쉽다는 것을 뜻한다. 이러한 경우에, 최상위 수준의 예측값은 하위 수준의 각 시계열 예측의 회귀자로 쓰일 수 있다.
 
-이번 예제에서 회귀자는 default로 가법(additive) 요소로 고려되었으며, 승법(multiplicative) 요소로도 고려될 수 있다. 다음 섹션이 승법성(mutipicativity)에 대한 내용에 해당한다.
+이번 예제에서 회귀자는 default로 가법(additive) 요소로 고려되었으며, 승법(multiplicative) 요소로도 고려될 수 있다. 다음 섹션이 승법성(mutiplicativity)에 대한 내용에 해당한다.
 
 ### 2.4 Multiplicative Seasonality
 Prophet 모형은 기본적으로 계절성을 가법적 요소로 적합하며, 이는 곧 추세 요소에 계절성의 효과를 더하여 예측을 수행함을 의미한다. 그러나, 증가 추세를 갖는 시계열에서 계절성의 크기도 증가하는 경우엔 계절성을 승법적으로 고려해야 한다. 
@@ -440,18 +485,19 @@ mod <- prophet(seasonality.mode = "multiplicative") %>%
 가법적 회귀자와 승법적 회귀자는 시계열의 각 요소를 나타내는 그림에서 분리된 패널에 그려진다. 그러나, 가법적 계절성과 승법적 계절성이 혼합되어 나타날 가능성은 거의없으므로, 일반적으로 이러한 계절성이 있을거라 예상하는 이유가 존재하는 경우에만 사용된다.
 
 ### 2.5 Uncertainty Intervals
-Prophet은 기본적으로 예측값 $yhat$에 대한 uncertainty intervals을 제공한다. 이 uncertainty intervals에는 몇몇 중요한 가정이 있다는 점을 알아둬야 한다. 예측의 uncertainty에는 3가지 요소(추세, 계절성, 추가적인 관측 잡음)가 있다.
+Prophet은 기본적으로 예측값 $yhat$에 대한 uncertainty intervals을 제공한다. 예측의 uncertainty에는 3가지 요소(추세, 계절성, 추가적인 관측 잡음)가 있으며, uncertainty intervals에는 몇몇 중요한 가정이 있다는 점을 알아둬야 한다.
 
 #### 2.5.1 Uncertainty in the trend
-먼저 추세 요소에 대한 예측의 uncertainty에 관해 알아보자. 예측의 uncertainty에 대한 가장 큰 요소는 미래의 추세 변화에 대한 가능성을 반영하는 추세 요소라 할 수 있다. 이번 튜토리얼에서 지금까지 다룬 시계열들은 과거에 명확한 추세 변화를 보여주었으며, Prophet은 이를 탐지하고 적합한다. 그러나, 과거에 발생했던 추세 변화의 패턴이 쭉 이어진다고 과연 기대할 수 있을까? 이를 확실히 아는 것은 당연히 불가능하고, Prophet에서는 이를 미래는 과거와 비슷한 추세를 띨 것이라는 가정하에 최대한 합리적으로 처리한다. 좀 더 구체적으로 말하면, Prophet에서는 미래의 추세 변화의 평균적 크기와 주기가 과거에서 우리가 관측했던 바와 같을 것이라 가정한다. 이를 통해 미래의 추세 변화를 예측하고, 그들의 분포를 계산하여 uncertainty intervals을 얻는다.
+먼저 추세 요소에 대한 예측의 uncertainty에 관해 알아보자. 예측의 uncertainty에 대한 가장 큰 요소는 미래의 추세 변화에 대한 가능성을 반영하는 추세 요소라 할 수 있다. 이번 튜토리얼에서 지금까지 다룬 시계열들은 과거에 명확한 추세 변화를 보여주었으며, Prophet은 이를 탐지하고 적합한다. 그러나, 과거에 발생했던 추세 변화의 패턴이 쭉 이어진다고 과연 기대할 수 있을까? 이를 확실히 아는 것은 당연히 불가능하고, Prophet에서는 이를 미래는 과거와 비슷한 추세를 띨 것이라는 가정하에 최대한 합리적으로 처리한다. 좀 더 구체적으로 말하면, Prophet에서는 미래의 추세 변화의 평균적 크기와 주기가 과거에서 우리가 관측했던 바와 같을 것이라 가정한다. 이를 통해 미래의 추세 변화를 예측하고, 그들의 분포를 계산하여 uncertainty intervals을 얻는다. 그래서, 이러한 가정때문에 사실 추정된 uncertainty intervals이 정확한 범위를 가질거라 기대하긴 어렵다.
 
-이러한 uncertainty 측정 방법의 한 가지 특성(property)은 `changepoint_prior_scale`을 키워 $\tau$에 대한 유연성(flexibility)를 높일 경우 예측의 uncertainty가 증가한다는 점이다. 이는 직관적으로도 당연하다. 추세 변화의 유연성을 키우면 더 많은 변화점이 탐지될 가능성이 커지고, 좀 더 복잡한 곡선을 적합하게 될 것이므로 이러한 복잡한 추세 변화를 미래 시점에도 똑같이 기대할 경우 당연히 uncertainty는 커질 것이기 때문이다. 아울러, 이러한 점 때문에 uncertainty intervals은 과적합의 유용한 척도가 된다.
+그러나, uncertainty intervals은 과적합의 유용한 척도가 된다. uncertainty 측정 방법의 한 가지 특성(property)은 `changepoint.prior.scale`($\tau$)를 키워 유연성(flexibility)를 높일 경우 예측의 uncertainty가 증가한다는 점인데, 이는 직관적으로도 당연하다. 추세 변화의 유연성을 키우면 더 많은 변화점이 탐지될 가능성이 커지고, 좀 더 복잡한 곡선을 적합하게 될 것이므로 미래 시점에 복잡한 추세 변화를 가정할 수록 당연히 uncertainty는 커질 것이기 때문이다. 
 
-uncertainty intervals의 간격은 기본적으로 80%이며, `interval_width`를 통해 조정할 수 있다:
-```{r, message = FALSE, eval = FALSE, cache = TRUE}
+Prophet에서 uncertainty intervals의 기본적인 범위는 80%이며, `interval_width`를 통해 조정할 수 있다:
+```{r, message = FALSE, echo = TRUE, eval = FALSE, cache = TRUE}
 prophet(air, interval.width = 0.95) %>% 
   predict(future)
 ```
+
 #### 2.5.2 Uncertainty in seasonality
 Prophet은 기본적으로 추세와 관측 잡음에 대한 uncertainty만 제공하는데, 계절성에 대한 uncertainty를 얻기 위해서는 `mcmc.samples` 인수를 설정하여 베이지안 표집(Bayesian sampling)을 수행해야 한다. `mcmc.samples`는 기본적으로 0으로 설정되어 있으며, 이름에서 알 수 있듯이 베이지안 표집 방법 중 하나인 MCMC(Markov Chain Monte Carlo, 마코프 체인 몬테카를로)를 통해 계절성의 경험적 사후 분포(empirical posterior distribution)를 추정한다. 다음은 이를 Peyton Manning 자료의 6개월 예측에 수행한 것이다. 샘플 수가 커질 수록 추정은 오래 걸릴 것이다:
 ```{r, message = FALSE, warning = FALSE, cache = TRUE}
@@ -464,7 +510,7 @@ prophet_plot_components(mod, pred)
 사후 예측 표본에 대한 값은 `predictive_samples(mod, future)`로 확인할 수 있다.
 
 ### 2.6 Outliers
-이상점(outliers)은 2가지 방식으로 Prophet 모형의 예측값에 영향을 미칠 수 있다. 이번 챕터에서는 [잘못 기록된 이상치가 포함된 R의 위키피디아 페이지 일별 조회 수에 로그를 취한 자료](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_R_outliers1.csv)를 사용할 것이다:
+이상점(outliers)은 2가지 방식으로 Prophet 모형의 예측값에 영향을 미칠 수 있다. 이번 챕터에서는 [잘못 기록된 이상점이 포함된 R의 위키피디아 페이지 일별 조회 수에 로그를 취한 자료](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_R_outliers1.csv)를 사용할 것이다:
 ```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 wp_outlier <- vroom("./data/example_wp_log_R_outliers1.csv", delim = ",")
 mod_outlier <- prophet(wp_outlier)
@@ -473,23 +519,168 @@ pred_outlier <- predict(mod_outlier, future_outlier)
 plot(mod_outlier, pred_outlier)
 ```
 
-적합된 추세는 꽤 합리적이여 보이긴 하지만, 예측값의 uncertainty intervals이 지나치게 넓게 추정되고 있다. 사실 Prophet에서 이상점을 처리하는 가장 좋은 방법은 이상점들을 제거하는 것이다. Prophet은 결측이 있는 자료에도 문제 없이 작동하기 때문이다. 과거값에 존재하는 이상점들을 `NA`로 처리하면, `make_future_dataframe()`을 통해 생성되는 예측에 필요한 객체에는 해당 날짜가 남아있을 것이며 Prophet은 해당 값에 대한 예측을 제공해 줄 것이다.
-```{r}
-# wp_outlier2 <- wp_outlier %>% 
-#   filter(ds > )
-
+적합된 추세는 꽤 합리적이여 보이긴 하지만, 예측값의 uncertainty intervals이 지나치게 넓게 추정되고 있다. 사실 Prophet에서 이상점을 처리하는 가장 좋은 방법은 이상점들을 제거하는 것이다. Prophet은 결측이 있는 자료에도 문제 없이 작동하기 때문이다. 과거값에 존재하는 이상점들을 `NA`로 처리하면, `make_future_dataframe()`을 통해 생성되는 예측에 필요한 객체에는 해당 날짜가 남아있을 것이며 Prophet은 해당 값에 대한 예측까지 제공해 줄 것이다.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+wp_outlier_rmv <- wp_outlier %>%
+  filter(ds <= ymd("2010-01-01") | ds >= ymd("2011-01-01") )
+mod_outlier_rmv <- prophet(wp_outlier_rmv)
+pred_outlier_rmv <- predict(mod_outlier_rmv, future_outlier)
+plot(mod_outlier_rmv, pred_outlier_rmv)
 ```
 
+앞서 다뤄본 이상점이 포함된 예제에서는 이상점들이 uncertainty intervals의 추정에는 큰 문제를 일으켰지만, 미래 예측값 `yhat`의 추정은 무리없이 수행하였다. 이상점이 포함된 자료가 항상 이렇게 uncertainty intervals의 추정에만 문제를 일으키는 것은 아니다. 2015년 6월에 여러 극단적인 이상점을 포함하고있는 다음 자료는 계절성 추정에 문제를 끼치며, 그에 따라 미래 예측값 `yhat`의 추정에 문제를 일으킨다.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+wp_outlier2 <- vroom("./data/example_wp_log_R_outliers2.csv", delim = ",")
+mod_outlier2 <- prophet(wp_outlier2)
+future_outlier2 <- make_future_dataframe(mod_outlier, periods = 1096)
+pred_outlier2 <- predict(mod_outlier2, future_outlier2)
+plot(mod_outlier2, pred_outlier2)
+```
+
+앞전의 해결책과 동일하게, 2015년 6월 자료를 제거하고 다시 모형을 적합하자:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+wp_outlier2_rmv <- wp_outlier2 %>% 
+  filter(ds < ymd("2015-06-01") | ds > ymd("2015-06-30"))
+mod_outlier2_rmv <- prophet(wp_outlier2_rmv)
+pred_outlier2_rmv <- predict(mod_outlier2_rmv, future_outlier2)
+plot(mod_outlier2_rmv, pred_outlier2_rmv)
+```
 
 ### 2.7 Non-Daily Data
+
 #### 2.7.1 Sub-daily data
+Prophet 모형은 YYYY-MM-DD HH:MM:SS 형태로 기록된 sub-daily 시계열 자료에도 적합할 수 있다(see the example csv [here](https://github.com/facebook/prophet/blob/master/examples/example_yosemite_temps.csv)). sub-daily 자료를 적합하는 경우 Prophet은 자동으로 일별 계절성을 적합한다. 이번 예제에서 쓰일 자료는 5분 간격으로 측정된 미국 요세미티 국립공원의 기온 자료에 해당한다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+yose <- vroom("./data/example_yosemite_temps.csv")
+mod <- prophet(yose, changepoint.prior.scale = 0.01)
+future <- make_future_dataframe(mod, periods = 300, freq = 60*60)
+pred <- predict(mod, future)
+plot(mod, pred) + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "2 weeks")
+```
+
+적합된 일별 계절성도 `prophet_plot_components()`에서 확인할 수 있다.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+prophet_plot_components(mod, pred)
+```
+
 #### 2.7.2 Data with regular gaps
+Prophet은 일정한 gaps을 갖는 자료이기만 하면 적합이 가능하다. 예를 들어, 앞서 사용했던 예제의 관측치가 하루에 5분 간격으로 AM 00:00~AM 06:00까지만 수집되는 자료라 가정하고 분석을 진행해보자.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+yose2 <- yose %>% 
+  mutate(hour = hour(ds)) %>% 
+  filter(hour < 6) %>% 
+  select(-hour)
+mod <- prophet(yose2)
+future <- make_future_dataframe(mod, periods = 300, freq = 60*60)
+pred <- predict(mod, future)
+plot(mod, pred) + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "2 weeks")
+```
+
+예측값을 보면 변동이 매우 크게 추정된 것을 확인할 수 있다. 그 이유는, 이전 예제와 달리 하루에 5분 간격으로 종일 측정된 자료가 아닌, 하루에 5분 간격으로 AM 00:00~AM 06:00까지만 수집되는 자료에 대해 일별 주기를 갖는 모형을 적합하여 일별 계절성의 추정이 잘 이루어지지 않기 때문이다. 이는 과거값들의 time window와 동일한 시점에 대해서만 예측값의 추정을 수행함으로써 해결할 수 있다. 즉, 미래 예측에도 하루에 5분 간격으로 AM 00:00~AM 06:00 시점에 대해서만 예측을 수행하는 것이다.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+future2 <- future %>% 
+  mutate(hour = hour(ds)) %>% 
+  filter(hour < 6) %>% 
+  select(-hour)
+pred <- predict(mod, future2)
+plot(mod, pred) + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "2 weeks")
+```
+
+다른 일정한 gaps을 갖는 시계열 자료에도 똑같은 방법이 적용된다. 에를 들어, 일별로 측정된 과거값이 주중(weekdays)에만 기록된다면 주말에 대한 주별 계절성의 추정에 어려움을 겪을 것이기 때문에, 예측도 주중에 대해서만 수행해야 할 것이다.
+
 #### 2.7.3 Monthly data
+Prophet은 월별 자료에 대해서도 적합이 가능하다. 다만, Prophet은 기본적으로 연속 시간에 대한 모형이기 때문에 월별 자료를 적합한 다음 일별로 예측을 수행하면 당연히 좋지 않은 결과를 얻을 것이다. 이는 앞선 챕터 2.7.2의 내용과도 일맥상통한다. 이번 챕터에서는 [월별 미국 소매 판매량 자료](https://github.com/facebook/prophet/blob/master/examples/example_retail_sales.csv)로 10년 예측을 수행한다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+retail <- vroom("./data/example_retail_sales.csv")
+mod <- prophet(retail, seasonality.mode = "multiplicative")
+future <- make_future_dataframe(mod, periods = 3652)
+pred <- predict(mod, future)
+plot(mod, pred)
+```
+
+월별 자료로 향후 10년을 예측하는데 향후 10년 예측을 일별로 수행하였으므로 당연히 예측에 문제가 발생한다. 연별 계절성을 적합하는데 월별 자료는 매달 첫째날에 대한 관측값만 주어지기 때문에, 남은 날들에 대한 계절 요소는 식별할 수 없다. 이러한 계절성의 불확실성은 MCMC를 사용해 계절성의 uncertainty를 추정해보면 그림으로도 확인할 수 있다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+mod <- prophet(retail, seasonality.mode = "multiplicative", mcmc.samples = 300)
+pred <- predict(mod, future)
+prophet_plot_components(mod, pred)
+```
+
+매달 첫째날에는 uncertainty가 낮으나, 첫째날은 제외하면 사후 분산이 매우 크게 추정되여 uncertainty intervals이 매우 넓게 추정된 것을 확인할 수 있다. 이러한 경우 2.7.2에서 배운 해결책과 똑같은 원칙을 적용하면된다. 다음과 같이 `make_future_datarame()`에서 `freq` 인수로 주기를 설정할 수 있다.
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+future <- make_future_dataframe(mod, periods = 120, freq = "month")
+pred <- predict(mod, future)
+plot(mod, pred)
+```
+
+월별 자료에서는 연도별 계절성의 모형화를 이진형 회귀자로도 수행할 수 있다. `is_jan`, `is_feb`와 같은 각 월을 나타내는 이진형 회귀자 12개를 도입하는 것이다. 예를 들어, `is_jan`는 1월에 해당하는 날짜에만 1 값을 가질 것이다. 이 접근 방법도 앞선 예제에서 MCMC를 통해 확인했던 문제를 피할 수 있게 해줄 것이다. 그리고, 이렇게 회귀자를 추가하여 연별 계절성을 모델링 하는 경우 모형 적합을 수행할 때 꼭 `yearly_seasonality = FALSE`를 명시해주어야 한다.
+
 #### 2.7.4 Holidays with aggregated data
+휴일효과는 특정 날짜가 명시된 휴일에만 적용된다. 그래서, 주별 또는 월별 주기를 갖는 합산 자료에서는 특정 날짜가 명시된 휴일효과는 무시될 것이다. 예를 들어, 매주 일요일마다 수집된 주별 시계열에서 월요일로 명시되는 휴일효과는 무시된다. 그래서 모형에 꼭 휴일효과의 반영이 필요하다면, 휴일효과를 해당 효과를 적용하길 원하는 날짜로 이동시켜야 한다. 
+
+그리고, 월별 또는 주별 주기를 갖는 자료에서 사실 대부분의 휴일효과는 연별 계절성에 의해 잘 잡힌다. 다만, 시계열이 관측된 기간내에 다른 주에 발생하는 휴일효과들이 존재한다면, 해당 휴일에 대해서만 휴일 효과를 추가해줄 필요가 있다(e.g. 우리나라의 음력을 따르는 명절은 매해 다른 날짜에 발생).
 
 ### 2.8 Diagnostics
-#### 2.8.1 Parallelizing cross validation
-#### 2.8.2 Hyperparameter tuning
+Prophet에는 rolling window 기법을 이용한 교차검증(cross-validation)으로 모형 진단을 수행하는 기능도 포함되어있다. Prophet의 일반화 성능을 키우기 위해서는 $\tau$의 튜닝은 꼭 필요로 될 것이다. 교차검증의 수행을 위해서는 먼저 과거값과 미래값을 나누는 cutoff 포인트를 정해야 한다. 해당 지점까지 자료로 모형을 적합하고, 이후 원하는만큼 예측을 수행하여 실제값과 비교해 예측 오차를 계산할 수 있다. 다음의 그림은 Peyton Manning 자료로 과거 5년자료로 1년을 예측했다는 것을 나타낸다:
+```{r figure3, echo = FALSE, fig.cap = "출처: facebook.github.io", fig.align = "center", out.width = "60%"}
+knitr::include_graphics("./fig/diagnostics_fig1.png")
+```
+
+교차검증 과정은 `cross_validation()`으로 정해진 cutoffs에 대해서 자동으로 수행된다. 우리는 훈련자료(training data) 이용할 크기, cutoffs 날짜 간 간격, 원하는 예측 길이(forecast horizon)을 `cross_validation()`의 인수 `initial`, `period`, `horizon` 각각에 명시해주면 된다. 그럼 cutoffs는 자동으로 결정이 된다. 기본 설정은 `horizon`을 명시해줄 경우, `initial`은 `horizon` 길이의 3배, `period`는 `horizon` 길이의 절반으로 설정된다.
+
+`cross_validation()`의 결과는 실제값 `y`, out-of-sample의 예측값 `yhat`, 예측 날짜, cutoff 날짜에 관한 정보를 각 열로 갖는 데이터프레임으로 주어지며, 이 데이터프레임의 `yhat`과 `y`를 예측 오차의 계산에 사용한다.
+
+다음의 예에서는 cutoffs 간격을 180일로 하고 약 2년을 훈련자료로 1년 예측을 수행해 교차검증을 한 것이다. Peyton Manning 자료에 대해 수행하였고, 해당 자료는 약 8년치 자료로 교차검증 수행결과 총 11개의 조각이 사용되었다.
+```{r, message = FALSE, cache = TRUE}
+mod <- prophet(wp_log_peyton)
+cv <- cross_validation(mod, initial = 730, period = 180, horizon = 365, units = 'days')
+head(cv)
+```
+
+원하는 cutoffs가 있다면 custom을 할 수도 있다. 다음은 cutoffs의 간격을 6개월로 설정한 것이다:
+```{r, message = FALSE, cache = TRUE}
+cutoffs <- seq(ymd("2013-02-15"), ymd("2014-02-15"), by = "6 months")
+cv2 <- cross_validation(mod, cutoffs = cutoffs, horizon = 365, units = 'days')
+```
+
+예측성능 평가 측도의 계산은 `performance_metrics()`으로 수행할 수 있다. 실제값 `y`를 `yhat`, `yhat_lower`, `yhat_upper`로 비교하여 평가 측도뿐만이 아닌 범위(coverage)도 계산해준다. 기본적으로 mean squared error (MSE), root mean squared error (RMSE), mean absolute error (MAE), mean absolute percent error (MAPE), median absolute percent error (MDAPE)와 각각의 범위를 제공해준다. 그리고, 해당 측도들은 각 예측시점에서 계산된다. 예를 들어, 앞서 만든 객체 `cv`로 계산을 한다고 하면, 각 예측시점마다 11개의 예측값으로 측도를 계산한다는 말이다.
+```{r, message = FALSE, cache = TRUE}
+metrics <- performance_metrics(cv)
+head(metrics)
+```
+
+결과가 37일 후부터 제공되는 이유는, `performance_metrics()`의 `rolling_window`인수가 default로 10%가 설정되어 있어, 365일 후까지의 예측값의 10%인 36일은 각 window에 포함시켜버리기 때문이다. 만약, 모든 예측시점에 대한 평가측도를 확인하고 싶다면, `rolling_window = 0`로 설정하면 된다.:
+```{r, message = FALSE, cache = TRUE}
+performance_metrics(cv, rolling_window = 0) %>% 
+  head
+```
+
+앞서 예측값의 10%인 36일가량을 window에 포함시켜 37일 후 미래시점을 예측했던 것과 달리 어떤 예측값도 window에 포함시키지 않았으므로, 37일 후의 예측값에 대한 성능은 저하됐을 것이다. 
+```{r, message = FALSE, cache = TRUE}
+performance_metrics(cv, rolling_window = 0) %>%
+  filter(horizon > 36) %>% 
+  head
+```
+
+그리고, 원하는 평가측도로의 시각화 기능도 제공한다:
+```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+plot_cross_validation_metric(cv, metric = 'mape')
+```
+
+그림의 파란색 선은 MAPE를 나타내며, 그에 따라 각 점은 APE(absolute percent error)를 나타낸다. 미래 시점의 한달정도까지는 약 5%의 MAPE 오차를 보이나, 1년 후 시점에 가까워질수록 약 11%까지 값이 증가하고 있다. 아울러, 해당 그림은 default로 `rolling_window = 0.1`이 설정되어 계산된 평가측도로부터 그려진 것으로, `rolling_window`을 키울수록 더 많은 예측값은 window에 포함하게 되므로 파란색 선은 더 평활될(smoother) 것이다. 그리고, 이러한 교차검증에서 주의할 점은 모형이 시계열의 모든 요소를 잘 추정할 수 있도록(특히, 계절성과 회귀자) 훈련자료의 길이(`initial`)를 충분히 길게 설정해야 한다는 것이다. 예컨데, 연별 계절성의 추정에는 최소 1년의 길이가 필요하고, 주별 계절성의 파악에는 최소 한 주가 포함되어야 한다.
+
+#### 2.8.1 Hyperparameter tuning
+교차검증은 `changepoint.prior.scale`($\tau$)와 `seasonality.prior.scale`($\nu^2$)과 같은 Prophet 모형의 초모수(hyperparameters) 튜닝에도 사용된다. 다만, Python의 Prophet 모형 패키지에서는 병렬 처리를 통한 교차검증(parallelizing cross validataion)을 제공하여 초모수 튜닝을 쉽고 빠르게 수행할 수 있으나, 아쉽게도 R에서는 관련 기능을 제공하지 않고있다. 아울러, Prophet 모형에는 튜닝에 고려될 수 있는 많은 모수가 존재하기 때문에, 모형의 성능을 개선하기 위해서는 이러한 과정이 꼭 필요로 된다. 
+
+그래서, R에서 Prophet 모형의 초모수들을 튜닝하고 최적의 모형을 선정하기 위해서는 병렬처리를 통한 교차검증을 수행할 수 있는 패키지의 도움을 받아야할 듯하다. 이 부분에 대해서는 관련 자료를 좀 더 찾아보고 정리하여 글을 적어야겠다는 생각이 든다.`r emo::ji("cry")` 조금만 기다려주시길 부탁드려본다.. `r emo::ji("sob")` 마지막으로 Prophet 모형의 초모수 튜닝의 좋은 시작점이 될 수 있는 몇 가지 일반적인 권고사항을 적고 이번 챕터를 마친다:
+
+* 튜닝할 수 있는 모수
+  + `changepoint.prior.scale`($\tau$): $\tau$는 아마 Prophet의 적합에 가장 큰 영향을 미치는 모수에 해당 할 것이다. 추세의 유연성을 결정하며, 특히 추세 변화점에서 추세가 얼마나 변화될지에 관여한다. 값이 너무 작을경우, 추세는 과소적합(underfit) 될 것이고, 추세 변화로 모델링했어야 하는 분산이 잡음(noise) 항으로 처리 될 것이다. 반대로 값이 너무 클경우, 추세는 과적합 될 것이며, 아주 극단적으로 과적합된 추세로 모델링된 경우엔 추세가 연도별 계절성까지 잡아내는 상황에 놓이게 될 것이다. 해당 모수의 기본 설정은 0.05로 대부분의 시계열에 잘 작동하나, [0.001, 0.5]의 범위에서 조정될 수 있다. 그리고, 해당 모수는 [2.2.1](#anchor)에서 언급했듯이 Lasso 회귀의 목적함수에 쓰이는 L1-regularization의 역할과 동일한데, 이러한 regularization penalty와 같은 모수의 튜닝에는 종종 로그 스케일이 쓰이곤 한다.
+  + `seasonality.prior.scale`($\sigma^2$): $\sigma^2$는 계절성의 유연성을 조절한다. $\tau$와 비슷하게, 너무 큰 값은 계절성의 과적합, 너무 작은 값은 계절성의 과소적합을 야기할 것이다. $\sigma^2$의 기본값은 10으로, $\tau$와는 달리 큰 값으로 설정되어 있어 regularization은 기본적으로 적용되지 않는다. 그 이유는, 계절성의 경우 푸리에 차수 $N$을 고려함으로써 무한합이 아닌 절단된(truncated) 푸리에 급수로 모형화되기 때문이다. 그래서, 계절성의 과적합은 왠만해선 발생하지 않는다. $\sigma^2$의 합리적인 튜닝 범위는 [0.01, 10]으로, 만약 계절성의 크기는 매우 작게 추정하길 원한다면 0.01로 설정하면 될 것이다. 아울러, 해당 모수 또한 [2.3.6](#anchor)에서 언급했듯이 Ridge penalty L2-regularization과 동일하므로 튜닝에 종종 로그 스케일이 쓰이곤 한다.
+  + `holidays.prior.sacle`($\nu^2$): $\nu^2$은 휴일효과의 유연성을 조절한다. `seasonality.prior.scale`($\sigma^2$)과 유사하게, 기본값이 10으로 설정되어 있어 regularization은 기본적으로 적용되지 않는다. 그 이유는 보통 각 휴일효과의 날짜에는 많은 관측치들이 속하기 때문에, 휴일효과의 추정은 대체로 꽤 잘 이루어지기 때문이다. 아울러, $\nu^2$의 합리적 튜닝 범위도 [0.01, 10]에 해당하며, 이하 내용은 `seasonality.prior.scale`에서 언급한 것과 같다.
+  + `seasonality.mode`: 
 
 ## **3 Additional Topics**
 ***
