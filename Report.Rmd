@@ -18,9 +18,6 @@ editor_options:
   font-size: small;
 }
 </style>
-
-<br>
-
 <center>
 If you are familiar with English, Here's the original text of the
 material:
@@ -39,6 +36,7 @@ and It's provided by the following Github repository:
 [be-favorite/Tutorial_prophet](https://github.com/be-favorite/Tutorial_prophet)
 </center>
 
+<br>
 
 ## **1 Quick Start** {.tabset .tabset-fade .tabset-pills}
 
