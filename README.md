@@ -1,6 +1,6 @@
 # R 유저들을 위한 단변량 시계열 예측모형 Prophet 소개
 
-* Prophet 모형 튜토리얼:
+* Prophet 모형 튜토리얼: https://be-favorite.github.io/Tutorial_prophet/Report.html
 * Prophet 모형의 간략한 이론 정리: https://be-favorite.tistory.com/64
 
 ## Introduction
