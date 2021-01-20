@@ -4,7 +4,6 @@
 * Prophet 모형의 간략한 이론 정리: https://be-favorite.tistory.com/64
 
 ## Introduction
-***
 이 Repo는 Facebook에서 제안한 시계열 예측모형인 Prophet을 소개하는 질 좋은 튜토리얼 자료를 찾고 있는 한국 R 유저들을 위해 만들었습니다. Facebook에서 훌륭한 [튜토리얼](https://facebook.github.io/prophet/docs/quick_start.html#r-api)을 제공하고 있으나, 영어로 된 자료라 영어에 능숙하지 않은 유저들은 약간 불편할 수 있겠다는 생각을 했어요. 안그래도 공부에 집중하기 힘든데, 영어로된 자료면 더 하기 싫을 때가 있죠. 사실 제가 공부하기 위한 이유가 젤 큽니다..:sweat_smile: Facebook에서 제공하는 튜토리얼을 기반으로 Prophet 논문을 참고한 제 의견을 첨가하여 훨씬 상세하게 튜토리얼을 작성해봤습니다.
 
 Prophet 모형을 이렇게 소개하는 이유는 [Prophet 논문](http://lethalletham.com/ForecastingAtScale.pdf)을 들여다 봤을 때, Facebook에서 해당 모형을 만든 motivation이 너무 매력적이었기 때문이에요. 시계열 예측 모형이 필요로 되는 실무자라면 이론적 부분은 차치하고 이 motivation만 이해해도 Prophet 모형을 얼른 적용해보고 싶을 겁니다:sunglasses:
