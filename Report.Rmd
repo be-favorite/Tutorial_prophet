@@ -149,11 +149,15 @@ pred %>%
 plot(mod, pred)
 ```
 
-위 그래프는 다음의 함수를 이용하면 interative하게 그릴 수도 있다:
+위 그래프는 `dyplor.prophet(mod, pred)`를 이용하면 다음과 같이 interative하게 그릴 수도 있다:
 
-```{r, warning = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
+<br>
+<center>
+```{r, warning = FALSE, out.width = "60%", echo = FALSE, cache = TRUE}
 dyplot.prophet(mod, pred)
 ```
+</center>
+<br>
 
 서론에서 Prophet 모형은 시계열을 3가지 요소(추세, 계절, 휴일효과)로
 분해하고 각 요소를 시간의 함수로 모형화한다는 말을 했었다.
