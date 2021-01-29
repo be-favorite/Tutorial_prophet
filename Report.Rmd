@@ -1,14 +1,9 @@
 ---
 title: "<center> **<font size = 5>R 유저들을 위한 단변량 시계열 예측 모형 Prophet 소개 **</font> </center>"
-author: "<center> <font size = 3> 방태모 </font> </center>"
-date: "<center>`r Sys.Date()`</center>"
+author: "방태모"
+date: "`r Sys.Date()`"
 output: 
-  html_document:
-      toc: yes
-      toc_depth: 3
-      toc_float: yes
-      theme: sandstone
-      highlight: tango
+  rmdformats::robobook
 editor_options: 
   markdown: 
     wrap: 72
@@ -18,25 +13,9 @@ editor_options:
   font-size: small;
 }
 </style>
-<center>
-If you are familiar with English, Here's the original text of the
-material:
-</center>
-<center>
-[Prophet
-Documentation](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
-</center>
-<center>
-The following text was written with reference to the above link 
-</center>
-<center>
-and It's provided by the following Github repository:
-</center>
-<center>
-[be-favorite/Tutorial_prophet](https://github.com/be-favorite/Tutorial_prophet)
-</center>
 
-<br>
+## **0 Before start**
+If you are familiar with English, go to [4 Reference](#anchor). And this text is provided by [my Github repository](https://github.com/be-favorite/Tutorial_prophet)
 
 ## **1 Quick Start** {.tabset .tabset-fade .tabset-pills}
 
@@ -1308,3 +1287,6 @@ validataion)을 제공하여 초모수 튜닝을 쉽고 빠르게 수행할 수 
 saveRDS(mod, file = "model.RDS")
 mod <- readRDS(file = "model.RDS")
 ```
+
+## **4 Refrence** {#anchor}
+- [Prophet Documentation](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
