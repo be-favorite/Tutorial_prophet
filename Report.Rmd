@@ -765,10 +765,8 @@ noise ratio)을 갖는 계층적 시계열을 들 수 있다. SNR이 더 높다�
 Prophet 모형은 기본적으로 계절성을 가법적 요소로 적합하며, 이는 곧 추세
 요소에 계절성의 효과를 더하여 예측을 수행함을 의미한다. 그러나, 증가
 추세를 갖는 시계열에서 계절성의 크기도 증가하는 경우엔 계절성을
-승법적으로 고려해야 한다. [Facebook의 Github repository - prophet]에서
-제공하는 다음의 [여객기 승객 수에 관한 일별
-자료](https://github.com/facebook/prophet/blob/master/examples/example_air_passengers.csv)가
-가법적 계절성이 작동하지 않는 예에 해당한다:
+승법적으로 고려해야 한다. 다음의 [여객기 승객 수에 관한 일별
+자료](https://github.com/facebook/prophet/blob/master/examples/example_air_passengers.csv)가 가법적 계절성이 작동하지 않는 예에 해당한다:
 
 ```{r, message = FALSE, fig.align = "center", out.width = "60%", cache = TRUE}
 air <- read_csv("./data/example_air_passengers.csv")
