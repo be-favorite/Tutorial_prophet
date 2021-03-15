@@ -15,12 +15,12 @@ editor_options:
 </style>
 
 ## **0 Before start**
+***
 If you are familiar with English, go to [4 Reference](#anchor). And this text is provided by [my Github repository](https://github.com/be-favorite/Tutorial_prophet)
 
 ## **1 Quick Start** {.tabset .tabset-fade .tabset-pills}
 
 ------------------------------------------------------------------------
-
 첫 번째 챕터는 Quick Start로 Prophet 모형 적합의 디테일한 부분을
 설명하지 않고, 러프하게 소개할 것이다.
 
